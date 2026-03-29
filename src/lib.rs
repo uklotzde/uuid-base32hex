@@ -42,7 +42,7 @@ impl Uuid {
     }
 
     #[must_use]
-    pub const fn is_nil(self) -> bool {
+    pub const fn is_nil(&self) -> bool {
         self.as_ref().is_nil()
     }
 
