@@ -48,11 +48,10 @@ jobs:
           # The cache should not be shared between different workflows and jobs.
           shared-key: ${{ github.workflow }}-${{ github.job }}
 
-      - name: Check WASM target with "js" feature enabled
+      - name: Check WASM target with default features
         run: >-
           cargo check --locked
           --target wasm32-unknown-unknown
-          --features js
 
       - name: Run tests with all features enabled
         run: >-
