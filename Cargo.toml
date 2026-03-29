@@ -37,9 +37,9 @@ uuid = { version = "1.23.0", features = ["v7"] }
 
 [features]
 default = ["std"]
-json-schema = ["serde", "dep:schemars"]
-serde = ["std", "dep:serde"]
 std = ["derive_more/std", "data-encoding/std", "uuid/std"]
+serde = ["std", "dep:serde"]
+json-schema = ["serde", "dep:schemars"]
 
 [lints.rust]
 # Opt-in for allowed-by-default lints (in alphabetical order)
