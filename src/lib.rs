@@ -9,7 +9,7 @@ use std::{fmt, hash::Hash, ops::Deref, str};
 use anyhow::bail;
 use data_encoding::{BASE32HEX_NOPAD, DecodePartial, Encoding};
 
-/// UUID v7 with base32hex string representation.
+/// UUID with base32hex string representation.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 #[cfg_attr(
@@ -87,6 +87,11 @@ impl Uuid {
     }
 
     #[must_use]
+    const fn encode_buf() -> [u8; Self::STR_LEN] {
+        [Self::ENCODING_PAD_CHAR; Self::STR_LEN]
+    }
+
+    #[must_use]
     fn encode_str_impl(self, output: &mut [u8; Self::STR_LEN]) -> &str {
         let Self { uuid } = self;
         let uuid_bytes = uuid.as_bytes();
@@ -117,10 +122,7 @@ impl Deref for Uuid {
 
 impl fmt::Display for Uuid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut encode_buf = [Self::ENCODING_PAD_CHAR; Self::STR_LEN];
-        let encoded_str = self.encode_str_impl(&mut encode_buf);
-        debug_assert_eq!(encoded_str, self.encode_str().as_str());
-        encoded_str.fmt(f)
+        UuidEncodedStr::encode(*self).fmt(f)
     }
 }
 
@@ -128,7 +130,7 @@ impl std::str::FromStr for Uuid {
     type Err = anyhow::Error;
 
     fn from_str(encoded: &str) -> Result<Self, Self::Err> {
-        Uuid::decode_str(encoded)
+        Self::decode_str(encoded)
     }
 }
 
@@ -169,32 +171,47 @@ impl serde::de::Visitor<'_> for UuidDeserializeFromStr {
     }
 
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "a base32hex encoded UUID v7")
+        write!(formatter, "a base32hex-encoded UUID")
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum UuidInvalidity {
-    Nil,
-}
-
+/// Stringified [`Uuid`].
+///
+/// Only supposed to be used as a temporary in-memory representation
+/// without serialization. Decoding the string back into a [`Uuid`]
+/// is infallible.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct UuidEncodedStr([u8; Uuid::STR_LEN]);
+pub struct UuidEncodedStr {
+    ascii_chars: [u8; Uuid::STR_LEN],
+}
 
 impl UuidEncodedStr {
-    pub const NIL: Self = Self([b'0'; Uuid::STR_LEN]);
+    pub const NIL: Self = Self {
+        ascii_chars: [b'0'; Uuid::STR_LEN],
+    };
 
     #[must_use]
-    #[expect(unsafe_code)]
+    #[expect(unsafe_code, reason = "ASCII characters of base32hex serialization.")]
     pub const fn as_str(&self) -> &str {
-        unsafe { std::str::from_utf8_unchecked(&self.0) }
+        unsafe { std::str::from_utf8_unchecked(&self.ascii_chars) }
+    }
+
+    #[must_use]
+    pub fn encode(uuid: Uuid) -> Self {
+        let mut encode_buf = Uuid::encode_buf();
+        let encode_len = uuid.encode_str_impl(&mut encode_buf).len();
+        debug_assert_eq!(encode_buf.len(), encode_len);
+        debug_assert!(encode_buf.is_ascii());
+        Self {
+            ascii_chars: encode_buf,
+        }
     }
 
     #[must_use]
     #[allow(clippy::missing_panics_doc, reason = "Infallible.")]
-    pub fn decode(&self) -> Uuid {
-        Uuid::decode_str(self).unwrap()
+    pub fn decode(self) -> Uuid {
+        Uuid::decode_ascii(&self.ascii_chars).unwrap()
     }
 }
 
@@ -206,10 +223,7 @@ impl Default for UuidEncodedStr {
 
 impl From<Uuid> for UuidEncodedStr {
     fn from(from: Uuid) -> Self {
-        let mut encode_buf = [0u8; Uuid::STR_LEN];
-        let encode_len = from.encode_str_impl(&mut encode_buf).len();
-        debug_assert_eq!(encode_len, encode_buf.len());
-        Self(encode_buf)
+        Self::encode(from)
     }
 }
 

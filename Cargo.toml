@@ -22,7 +22,7 @@ uuid = { version = "1.23.0", default-features = false }
 # Serde serialization (optional).
 serde = { version = "1.0.228", optional = true, features = ["derive"] }
 
-# JSON Schema (optional)
+# JSON Schema (optional).
 schemars = { version = "1.2.1", optional = true }
 
 [features]
