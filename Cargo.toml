@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: The uuid-base32hex authors
+# SPDX-License-Identifier: MPL-2.0
+
+[package]
+name = "uuid-base32hex"
+description = "UUIDs with a base32hex string representation."
+version = "0.0.1"
+license = "MPL-2.0"
+readme = "README.md"
+repository = "https://github.com/uklotzde/uuid-base32hex"
+keywords = ["guid", "unique", "uuid"]
+categories = ["data-structures", "no-std", "parser-implementations", "wasm"]
+rust-version = "1.94"
+edition = "2024"
+include = ["/src", "/README.md", "/LICENSES"]
+
+[dependencies]
+anyhow = "1.0.102"
+data-encoding = { version = "2.10.0", default-features = false }
+uuid = { version = "1.23.0", default-features = false }
+
+# Serde serialization (optional).
+serde = { version = "1.0.228", optional = true, features = ["derive"] }
+
+# JSON Schema (optional)
+schemars = { version = "1.2.1", optional = true }
+
+[features]
+default = ["std", "v7"]
+std = ["data-encoding/std", "uuid/std"]
+v7 = ["uuid/v7"]
+serde = ["std", "dep:serde"]
+json-schema = ["serde", "dep:schemars"]
+
+[lints.rust]
+# Opt-in for allowed-by-default lints (in alphabetical order)
+# See also: <https://doc.rust-lang.org/rustc/lints>
+future_incompatible = "warn"
+let_underscore = "warn"
+missing_debug_implementations = "warn"
+rust_2018_idioms = "warn"
+rust_2021_compatibility = "warn"
+rust_2024_compatibility = "warn"
+unreachable_pub = "warn"
+unsafe_code = "warn"
+unused = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+clone_on_ref_ptr = "warn"
+missing_const_for_fn = "warn"
+self_named_module_files = "warn"
+
+# Repetitions of module/type names occur frequently when using many
+# modules for keeping the size of the source files handy. Often
+# types have the same name as their parent module.
+module_name_repetitions = "allow"
+
+# Repeating the type name in `Default::default()` expressions
+# is not needed as long as the context is obvious.
+default_trait_access = "allow"
+
+# The error types returned should be self-explanatory.
+missing_errors_doc = "allow"
+
+# Inevitable for short names.
+similar_names = "allow"
