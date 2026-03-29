@@ -20,9 +20,11 @@ clippy:
 check-features:
     cargo hack check --each-feature --no-dev-deps
 
-[doc('Run cargo check for the WASM target with default features enabled')]
+[doc('Run cargo check for the WASM target with different feature combinations')]
 check-wasm:
     cargo check --locked --workspace --target wasm32-unknown-unknown --features js
+    cargo check --locked --workspace --target wasm32-unknown-unknown --no-default-features --features js
+    cargo check --locked --workspace --target wasm32-unknown-unknown --all-features
 
 [doc('Run unit tests')]
 test:
