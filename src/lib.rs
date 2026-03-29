@@ -92,12 +92,23 @@ impl Uuid {
     }
 
     #[must_use]
-    fn encode_str_impl(self, output: &mut [u8; Self::STR_LEN]) -> &str {
+    fn encode_str_impl<'a>(&self, output: &'a mut [u8; Self::STR_LEN]) -> &'a str {
         let Self { uuid } = self;
         let uuid_bytes = uuid.as_bytes();
         let encoded_str = Self::ENCODING.encode_mut_str(uuid_bytes, output);
         debug_assert_eq!(encoded_str.len(), Self::STR_LEN);
         encoded_str
+    }
+
+    #[must_use]
+    pub fn encode_str(&self) -> UuidEncodedStr {
+        let mut encode_buf = Self::encode_buf();
+        let encode_len = self.encode_str_impl(&mut encode_buf).len();
+        debug_assert_eq!(encode_buf.len(), encode_len);
+        debug_assert!(encode_buf.is_ascii());
+        UuidEncodedStr {
+            ascii_chars: encode_buf,
+        }
     }
 }
 
@@ -194,13 +205,7 @@ impl UuidEncodedStr {
 
     #[must_use]
     pub fn encode(uuid: &Uuid) -> Self {
-        let mut encode_buf = Uuid::encode_buf();
-        let encode_len = uuid.encode_str_impl(&mut encode_buf).len();
-        debug_assert_eq!(encode_buf.len(), encode_len);
-        debug_assert!(encode_buf.is_ascii());
-        Self {
-            ascii_chars: encode_buf,
-        }
+        uuid.encode_str()
     }
 
     #[must_use]
