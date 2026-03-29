@@ -46,7 +46,7 @@ impl Uuid {
         self.as_ref().is_nil()
     }
 
-    #[cfg(feature = "v7")]
+    #[cfg(all(feature = "std", feature = "v7"))]
     #[must_use]
     pub fn now_v7() -> Self {
         Self {
