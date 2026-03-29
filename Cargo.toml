@@ -21,6 +21,7 @@ derive_more = { version = "2.1.1", default-features = false, features = [
   "display",
   "error",
   "from",
+  "into",
 ] }
 data-encoding = { version = "2.10.0", default-features = false }
 uuid = { version = "1.23.0", default-features = false }

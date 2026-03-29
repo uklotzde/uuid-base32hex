@@ -16,6 +16,13 @@ fn default() {
 }
 
 #[test]
+fn new_from_into() {
+    let uuid = Uuid::now_v7();
+    assert_eq!(Uuid::new(uuid.into()), uuid);
+    assert_eq!(Uuid::from(uuid.into()), uuid);
+}
+
+#[test]
 fn should_encode_decode_uuid() {
     let uuid = Uuid::now_v7();
     let encoded_str = UuidEncodedStr::encode(&uuid);
@@ -29,18 +36,18 @@ fn should_fail_to_decode_too_long_string() {
     let uuid = Uuid::now_v7();
 
     // Test encode -> decode roundtrip
-    let mut encoded = uuid.to_string();
+    let encoded = uuid.encode_str();
     assert!(Uuid::decode_str(&encoded).is_ok());
 
-    // Append the first character of the alphabet to the encoded string.
-    encoded.push('0');
-    assert!(Uuid::decode_str(&encoded).is_err());
+    // Append/prepend the first character of the alphabet to the encoded string.
+    assert!(Uuid::decode_str(&[&encoded, "0"].concat()).is_err());
+    assert!(Uuid::decode_str(&["0", &encoded].concat()).is_err());
 }
 
 #[test]
 fn should_fail_to_decode_too_short_string() {
     let uuid = Uuid::now_v7();
-    let mut encoded = uuid.to_string();
-    encoded.truncate(Uuid::STR_LEN - 1);
-    assert!(Uuid::decode_str(&encoded).is_err());
+    let encoded = uuid.encode_str();
+    assert!(Uuid::decode_str(&encoded[..encoded.len() - 1]).is_err());
+    assert!(Uuid::decode_str(&encoded[1..]).is_err());
 }

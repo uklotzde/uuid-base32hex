@@ -7,10 +7,12 @@
 use std::{fmt, hash::Hash, str};
 
 use data_encoding::{BASE32HEX_NOPAD, DecodePartial, Encoding};
-use derive_more::{AsRef, Deref, Display, Error, From};
+use derive_more::{AsRef, Deref, Display, Error, From, Into};
 
 /// UUID with base32hex string representation.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
+#[derive(
+    Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref, From, Into,
+)]
 #[repr(transparent)]
 #[cfg_attr(
     feature = "json-schema",
@@ -34,6 +36,17 @@ impl Uuid {
     pub const NIL: Self = Self {
         uuid: uuid::Uuid::nil(),
     };
+
+    #[must_use]
+    pub const fn new(uuid: uuid::Uuid) -> Self {
+        Self { uuid }
+    }
+
+    #[must_use]
+    pub const fn into(self) -> uuid::Uuid {
+        let Self { uuid } = self;
+        uuid
+    }
 
     #[must_use]
     pub const fn as_ref(&self) -> &uuid::Uuid {
