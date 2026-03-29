@@ -37,7 +37,6 @@ uuid = { version = "1.23.0", features = ["v7"] }
 
 [features]
 default = ["std"]
-js = ["uuid/js"]
 json-schema = ["serde", "dep:schemars"]
 serde = ["std", "dep:serde"]
 std = ["derive_more/std", "data-encoding/std", "uuid/std"]

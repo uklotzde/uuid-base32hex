@@ -22,8 +22,8 @@ check-features:
 
 [doc('Run cargo check for the WASM target with different feature combinations')]
 check-wasm:
-    cargo check --locked --workspace --target wasm32-unknown-unknown --features js
-    cargo check --locked --workspace --target wasm32-unknown-unknown --no-default-features --features js
+    cargo check --locked --workspace --target wasm32-unknown-unknown
+    cargo check --locked --workspace --target wasm32-unknown-unknown --no-default-features
     cargo check --locked --workspace --target wasm32-unknown-unknown --all-features
 
 [doc('Run unit tests')]
