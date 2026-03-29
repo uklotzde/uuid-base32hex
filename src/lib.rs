@@ -77,9 +77,9 @@ impl Uuid {
                 debug_assert!(read <= input.len());
                 debug_assert!(written <= decode_buf.len());
                 #[cfg(feature = "std")]
-                return Err(DecodeInputError::Superfluous(error).into());
+                return Err(DecodeInputError::Malformed(error).into());
                 #[cfg(not(feature = "std"))]
-                return Err(DecodeInputError::Superfluous.into());
+                return Err(DecodeInputError::Malformed.into());
             }
         }
         let uuid = uuid::Uuid::from_bytes(decode_buf);
@@ -127,11 +127,11 @@ enum DecodeInputError {
     #[display("insufficient input")]
     Insufficient,
     #[cfg(feature = "std")]
-    #[display("superfluous input: {_0:#}")]
-    Superfluous(data_encoding::DecodeError),
+    #[display("malformed input: {_0:#}")]
+    Malformed(data_encoding::DecodeError),
     #[cfg(not(feature = "std"))]
-    #[display("superfluous input")]
-    Superfluous,
+    #[display("malformed input")]
+    Malformed,
 }
 
 impl fmt::Display for Uuid {
