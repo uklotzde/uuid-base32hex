@@ -4,13 +4,13 @@
 #![expect(rustdoc::invalid_rust_codeblocks)]
 #![doc = include_str!("../README.md")]
 
-use std::{fmt, hash::Hash, ops::Deref, str};
+use std::{fmt, hash::Hash, str};
 
-use anyhow::bail;
 use data_encoding::{BASE32HEX_NOPAD, DecodePartial, Encoding};
+use derive_more::{AsRef, Deref, Display, Error, From};
 
 /// UUID with base32hex string representation.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
 #[repr(transparent)]
 #[cfg_attr(
     feature = "json-schema",
@@ -54,35 +54,39 @@ impl Uuid {
         }
     }
 
-    fn decode_ascii(input: &[u8]) -> anyhow::Result<Self> {
+    fn decode_ascii(input: &[u8]) -> Result<Self, DecodeError> {
         const DECODED_LEN: usize = 16;
         debug_assert_eq!(DECODED_LEN, uuid::Uuid::nil().as_bytes().len());
         if input.len() != Self::STR_LEN {
-            bail!("invalid input");
+            return Err(DecodeInputError::Invalid.into());
         }
         let mut decode_buf = [0; DECODED_LEN];
         match Self::ENCODING.decode_mut(input, &mut decode_buf) {
             Ok(decode_len) => {
                 debug_assert!(decode_len <= DECODED_LEN);
                 if decode_len < DECODED_LEN {
-                    bail!("insufficient input");
+                    return Err(DecodeInputError::Insufficient.into());
                 }
             }
             Err(DecodePartial {
+                #[cfg_attr(not(feature = "std"), expect(unused_variables))]
                 error,
                 read,
                 written,
             }) => {
                 debug_assert!(read <= input.len());
                 debug_assert!(written <= decode_buf.len());
-                bail!("invalid input: {error:#}");
+                #[cfg(feature = "std")]
+                return Err(DecodeInputError::Superfluous(error).into());
+                #[cfg(not(feature = "std"))]
+                return Err(DecodeInputError::Superfluous.into());
             }
         }
         let uuid = uuid::Uuid::from_bytes(decode_buf);
         Ok(Self { uuid })
     }
 
-    fn decode_str(input: &str) -> anyhow::Result<Self> {
+    fn decode_str(input: &str) -> Result<Self, DecodeError> {
         Self::decode_ascii(input.as_bytes())
     }
 
@@ -112,18 +116,22 @@ impl Uuid {
     }
 }
 
-impl AsRef<uuid::Uuid> for Uuid {
-    fn as_ref(&self) -> &uuid::Uuid {
-        &self.uuid
-    }
-}
+#[derive(Debug, Display, Error, From)]
+#[repr(transparent)]
+pub struct DecodeError(DecodeInputError);
 
-impl Deref for Uuid {
-    type Target = uuid::Uuid;
-
-    fn deref(&self) -> &uuid::Uuid {
-        self.as_ref()
-    }
+#[derive(Debug, Display, Error)]
+enum DecodeInputError {
+    #[display("invalid input")]
+    Invalid,
+    #[display("insufficient input")]
+    Insufficient,
+    #[cfg(feature = "std")]
+    #[display("superfluous input: {_0:#}")]
+    Superfluous(data_encoding::DecodeError),
+    #[cfg(not(feature = "std"))]
+    #[display("superfluous input")]
+    Superfluous,
 }
 
 impl fmt::Display for Uuid {
@@ -133,7 +141,7 @@ impl fmt::Display for Uuid {
 }
 
 impl std::str::FromStr for Uuid {
-    type Err = anyhow::Error;
+    type Err = DecodeError;
 
     fn from_str(encoded: &str) -> Result<Self, Self::Err> {
         Self::decode_str(encoded)
@@ -184,8 +192,8 @@ impl serde::de::Visitor<'_> for UuidDeserializeFromStr {
 /// Stringified [`Uuid`].
 ///
 /// Only supposed to be used as a temporary in-memory representation
-/// without serialization. Decoding the string back into a [`Uuid`]
-/// is infallible.
+/// without support for serialization. Decoding the string back into
+/// a [`Uuid`] is infallible.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct UuidEncodedStr {
@@ -239,11 +247,11 @@ impl AsRef<str> for UuidEncodedStr {
     }
 }
 
-impl Deref for UuidEncodedStr {
+impl std::ops::Deref for UuidEncodedStr {
     type Target = str;
 
     fn deref(&self) -> &str {
-        self.as_ref()
+        self.as_str()
     }
 }
 

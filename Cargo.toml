@@ -15,7 +15,13 @@ edition = "2024"
 include = ["/src", "/README.md", "/LICENSES"]
 
 [dependencies]
-anyhow = { version = "1.0.102", default-features = false }
+derive_more = { version = "2.1.1", default-features = false, features = [
+  "as_ref",
+  "deref",
+  "display",
+  "error",
+  "from",
+] }
 data-encoding = { version = "2.10.0", default-features = false }
 uuid = { version = "1.23.0", default-features = false }
 
@@ -30,7 +36,7 @@ default = ["std", "v7"]
 js = ["uuid/js"]
 json-schema = ["serde", "dep:schemars"]
 serde = ["std", "dep:serde"]
-std = ["anyhow/std", "data-encoding/std", "uuid/std"]
+std = ["derive_more/std", "data-encoding/std", "uuid/std"]
 v7 = ["uuid/v7"]
 
 [lints.rust]
