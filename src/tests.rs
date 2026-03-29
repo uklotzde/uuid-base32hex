@@ -3,6 +3,10 @@
 
 use super::{Uuid, UuidEncodedStr};
 
+fn random_uuid() -> Uuid {
+    uuid::Uuid::now_v7().into()
+}
+
 #[test]
 fn nil() {
     assert_eq!(UuidEncodedStr::encode(&Uuid::NIL), UuidEncodedStr::NIL);
@@ -17,14 +21,14 @@ fn default() {
 
 #[test]
 fn new_from_into() {
-    let uuid = Uuid::now_v7();
+    let uuid = random_uuid();
     assert_eq!(Uuid::new(uuid.into()), uuid);
     assert_eq!(Uuid::from(uuid.into()), uuid);
 }
 
 #[test]
 fn should_encode_decode_uuid() {
-    let uuid = Uuid::now_v7();
+    let uuid = random_uuid();
     let encoded_str = UuidEncodedStr::encode(&uuid);
     assert_eq!(encoded_str.len(), Uuid::STR_LEN);
     let decoded = encoded_str.decode();
@@ -33,7 +37,7 @@ fn should_encode_decode_uuid() {
 
 #[test]
 fn should_fail_to_decode_too_long_string() {
-    let uuid = Uuid::now_v7();
+    let uuid = random_uuid();
 
     // Test encode -> decode roundtrip
     let encoded = uuid.encode_str();
@@ -46,7 +50,7 @@ fn should_fail_to_decode_too_long_string() {
 
 #[test]
 fn should_fail_to_decode_too_short_string() {
-    let uuid = Uuid::now_v7();
+    let uuid = random_uuid();
     let encoded = uuid.encode_str();
     assert!(Uuid::decode_str(&encoded[..encoded.len() - 1]).is_err());
     assert!(Uuid::decode_str(&encoded[1..]).is_err());

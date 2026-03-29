@@ -32,13 +32,15 @@ serde = { version = "1.0.228", optional = true, features = ["derive"] }
 # JSON Schema (optional).
 schemars = { version = "1.2.1", optional = true }
 
+[dev-dependencies]
+uuid = { version = "1.23.0", features = ["v7"] }
+
 [features]
-default = ["std", "v7"]
+default = ["std"]
 js = ["uuid/js"]
 json-schema = ["serde", "dep:schemars"]
 serde = ["std", "dep:serde"]
 std = ["derive_more/std", "data-encoding/std", "uuid/std"]
-v7 = ["uuid/v7"]
 
 [lints.rust]
 # Opt-in for allowed-by-default lints (in alphabetical order)

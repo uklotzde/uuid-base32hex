@@ -59,14 +59,6 @@ impl Uuid {
         self.as_ref().is_nil()
     }
 
-    #[cfg(all(feature = "std", feature = "v7"))]
-    #[must_use]
-    pub fn now_v7() -> Self {
-        Self {
-            uuid: uuid::Uuid::now_v7(),
-        }
-    }
-
     fn decode_ascii(input: &[u8]) -> Result<Self, DecodeError> {
         const DECODED_LEN: usize = 16;
         debug_assert_eq!(DECODED_LEN, uuid::Uuid::nil().as_bytes().len());
