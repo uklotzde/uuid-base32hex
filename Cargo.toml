@@ -4,7 +4,7 @@
 [package]
 name = "uuid-base32hex"
 description = "UUIDs with a base32hex string representation."
-version = "0.1.0"
+version = "0.1.1"
 license = "MPL-2.0"
 readme = "README.md"
 repository = "https://github.com/uklotzde/uuid-base32hex"
