@@ -15,7 +15,7 @@ edition = "2024"
 include = ["/src", "/README.md", "/LICENSES"]
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = { version = "1.0.102", default-features = false }
 data-encoding = { version = "2.10.0", default-features = false }
 uuid = { version = "1.23.0", default-features = false }
 
@@ -27,7 +27,7 @@ schemars = { version = "1.2.1", optional = true }
 
 [features]
 default = ["std", "v7"]
-std = ["data-encoding/std", "uuid/std"]
+std = ["anyhow/std", "data-encoding/std", "uuid/std"]
 v7 = ["uuid/v7"]
 serde = ["std", "dep:serde"]
 json-schema = ["serde", "dep:schemars"]
