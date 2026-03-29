@@ -5,7 +5,7 @@ use super::{Uuid, UuidEncodedStr};
 
 #[test]
 fn nil() {
-    assert_eq!(Uuid::NIL.encode_str(), UuidEncodedStr::NIL);
+    assert_eq!(UuidEncodedStr::encode(&Uuid::NIL), UuidEncodedStr::NIL);
     assert_eq!(UuidEncodedStr::NIL.decode(), Uuid::NIL);
 }
 
@@ -18,7 +18,7 @@ fn default() {
 #[test]
 fn should_encode_decode_uuid() {
     let uuid = Uuid::now_v7();
-    let encoded_str = uuid.encode_str();
+    let encoded_str = UuidEncodedStr::encode(&uuid);
     assert_eq!(encoded_str.len(), Uuid::STR_LEN);
     let decoded = encoded_str.decode();
     assert_eq!(uuid, decoded);

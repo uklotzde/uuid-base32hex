@@ -99,11 +99,6 @@ impl Uuid {
         debug_assert_eq!(encoded_str.len(), Self::STR_LEN);
         encoded_str
     }
-
-    #[must_use]
-    pub fn encode_str(self) -> UuidEncodedStr {
-        UuidEncodedStr::from(self)
-    }
 }
 
 impl AsRef<uuid::Uuid> for Uuid {
@@ -122,7 +117,7 @@ impl Deref for Uuid {
 
 impl fmt::Display for Uuid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        UuidEncodedStr::encode(*self).fmt(f)
+        UuidEncodedStr::encode(self).fmt(f)
     }
 }
 
@@ -198,7 +193,7 @@ impl UuidEncodedStr {
     }
 
     #[must_use]
-    pub fn encode(uuid: Uuid) -> Self {
+    pub fn encode(uuid: &Uuid) -> Self {
         let mut encode_buf = Uuid::encode_buf();
         let encode_len = uuid.encode_str_impl(&mut encode_buf).len();
         debug_assert_eq!(encode_buf.len(), encode_len);
@@ -210,7 +205,7 @@ impl UuidEncodedStr {
 
     #[must_use]
     #[allow(clippy::missing_panics_doc, reason = "Infallible.")]
-    pub fn decode(self) -> Uuid {
+    pub fn decode(&self) -> Uuid {
         Uuid::decode_ascii(&self.ascii_chars).unwrap()
     }
 }
@@ -223,7 +218,7 @@ impl Default for UuidEncodedStr {
 
 impl From<Uuid> for UuidEncodedStr {
     fn from(from: Uuid) -> Self {
-        Self::encode(from)
+        Self::encode(&from)
     }
 }
 
