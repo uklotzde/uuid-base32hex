@@ -22,7 +22,7 @@ check-features:
 
 [doc('Run cargo check for the WASM target with default features enabled')]
 check-wasm:
-    cargo check --locked --workspace --target wasm32-unknown-unknown
+    cargo check --locked --workspace --target wasm32-unknown-unknown --features js
 
 [doc('Run unit tests')]
 test:

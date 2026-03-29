@@ -27,10 +27,11 @@ schemars = { version = "1.2.1", optional = true }
 
 [features]
 default = ["std", "v7"]
+js = ["uuid/js"]
+json-schema = ["serde", "dep:schemars"]
+serde = ["std", "dep:serde"]
 std = ["anyhow/std", "data-encoding/std", "uuid/std"]
 v7 = ["uuid/v7"]
-serde = ["std", "dep:serde"]
-json-schema = ["serde", "dep:schemars"]
 
 [lints.rust]
 # Opt-in for allowed-by-default lints (in alphabetical order)
